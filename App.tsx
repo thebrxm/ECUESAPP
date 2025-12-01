@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, RotateCcw, Copy, Share2, FileText, ChevronDown, ChevronUp, Plus, Minus, Trash2, Ambulance, MapPin, ClipboardList, Stethoscope } from 'lucide-react';
+import { Moon, Sun, RotateCcw, Copy, Share2, FileText, ChevronDown, ChevronUp, Plus, Minus, Trash2, Ambulance, MapPin, ClipboardList, Stethoscope, List, X, Pencil } from 'lucide-react';
 import { Counter } from './components/Counter';
 import { Section } from './components/Section';
 import { generatePDF } from './utils/pdf';
@@ -9,6 +10,7 @@ interface Hospital {
   id: string;
   name: string;
   count: number;
+  isCustom?: boolean;
 }
 
 interface MethaneData {
@@ -26,7 +28,7 @@ const HOSPITAL_OPTIONS = [
   "HOSPITAL RIVADAVIA", "HOSPITAL PIROVANO", "HOSPITAL TORNU", "HOSPITAL SANTOJANNI",
   "HOSPITAL PIÑERO", "HOSPITAL GRIERSON", "HOSPITAL ZUBIZARRETA", "HOSPITAL VELEZ SARSFIELD",
   "HOSPITAL ALVAREZ", "HOSPITAL DURAND", "HOSPITAL MUÑIZ", "HOSPITAL SANTA LUCIA",
-  "HOSPITAL GUTIERREZ", "HOSPITAL ELIZALDE"
+  "HOSPITAL GUTIERREZ", "HOSPITAL ELIZALDE", "OTROS"
 ];
 
 function App() {
@@ -195,11 +197,19 @@ function App() {
       }
       
       if (field === 'name') {
-        return { ...h, name: String(value) };
+        const strVal = String(value);
+        if (!h.isCustom && strVal === 'OTROS') {
+            return { ...h, name: '', isCustom: true };
+        }
+        return { ...h, name: strVal };
       }
 
       return h;
     }));
+  };
+
+  const revertCustomHospital = (id: string) => {
+    setHospitals(prev => prev.map(h => h.id === id ? { ...h, isCustom: false, name: '' } : h));
   };
 
   const addHospital = () => {
@@ -515,14 +525,34 @@ ${notas}`;
             {hospitals.map((h, idx) => (
               <div key={h.id} className="flex flex-col sm:flex-row gap-3 items-end sm:items-center bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-100 dark:border-gray-700">
                 <div className="flex-1 w-full">
-                  <select 
-                    value={h.name}
-                    onChange={(e) => handleHospitalChange(h.id, 'name', e.target.value)}
-                    className="w-full bg-white dark:bg-darkcard border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-sm"
-                  >
-                    <option value="">Seleccionar Hospital...</option>
-                    {HOSPITAL_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
+                  {h.isCustom ? (
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={h.name} 
+                        onChange={(e) => handleHospitalChange(h.id, 'name', e.target.value)}
+                        placeholder="Nombre del hospital..."
+                        className="w-full bg-white dark:bg-darkcard border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        autoFocus
+                      />
+                      <button 
+                        onClick={() => revertCustomHospital(h.id)}
+                        className="p-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors flex-shrink-0"
+                        title="Volver a lista"
+                      >
+                        <List size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <select 
+                      value={h.name}
+                      onChange={(e) => handleHospitalChange(h.id, 'name', e.target.value)}
+                      className="w-full bg-white dark:bg-darkcard border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-sm"
+                    >
+                      <option value="">Seleccionar Hospital...</option>
+                      {HOSPITAL_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => handleHospitalChange(h.id, 'count', Math.max(0, h.count - 1))} className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300"><Minus size={14}/></button>
