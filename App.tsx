@@ -255,10 +255,8 @@ function App() {
 
 *${isFinal ? 'FINAL' : 'Hasta ahora'} ${total} pacientes*
 
-Pacientes:
-- Total: ${total}
-- Óbitos: ${counts.obitos}
-- Evacuados: ${counts.evacuados}
+Pacientes: Total: ${total}
+- Óbitos: ${counts.obitos} | Evacuados: ${counts.evacuados}
 
 Sexo:
 - Masc: ${counts.masculino} | Fem: ${counts.femenino}
